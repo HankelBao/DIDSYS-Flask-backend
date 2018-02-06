@@ -1,51 +1,43 @@
-from settings import *
+from pymongo import MongoClient
 
-def Field():
-    return ""
+class MongoConnection():
+    def __init__(self, database_name):
+        if database_name:
+            client=MongoClient('localhost', 27017) 
+            self.db=client[database_name]
+    
+    def get_db(self):
+        if self.db:
+            return self.db
 
-def ListField():
-    return []
+class Document():
+    def __init__(self, mongo_connection, document_name, fields_names, index_names=None):
+        db = mongo_connection.get_db()
+        self.doc = db.__getattr__(document_name)
 
-class ModelMetaclass(type):
-    def __new__(cls, name, bases, attrs):
-        attrs['__table__'] = name
-        return type.__new__(cls, name, bases, attrs)
+        self.fields = {}
+        for field_name in fields_names:
+            self.fields[field_name] = None
 
+        self.index_names = index_names
+        
 
-class EmbeddedDocument(dict, object, metaclass=ModelMetaclass):
-    def __init__(self, **kw):
-        try:
-            test_valid = kw['name']
-        except KeyError:
-            kw['name'] = ""
-        for name, value in vars(self.__class__).items():
-            try:
-                test_valid = kw[name]
-            except KeyError:
-                if  name != "__table__" and name != "__doc__" and name != "__module__" :
-                    kw[name] = value
-        super(EmbeddedDocument, self).__init__(**kw)
-
-
-    def __getattr__(self, key):
-        try:
-            return self[key]
-        except KeyError:
-            raise AttributeError(r"'Model' object has no attribute '%s'" % key)
-
-    def __setattr__(self, key, value):
-        self[key] = value
-
-
-class Document(EmbeddedDocument):
-    def save(self):
-        if mongo.db.__getattr__(self.__table__).find_one({"name": self['name']}):
-            mongo.db.__getattr__(self.__table__).update(
-                {"name": self['name']}, self)
+    def check_exist(self):
+        if not self.index_names:
+            return False
+        
+        index_condition = {}
+        for index_name in self.index_names:
+            index_condition[index_name] = self.fields[index_name]
+        
+        if self.doc.find_one(index_condition):
+            return True
         else:
-            mongo.db.__getattr__(self.__table__).insert(self)
+            return False
 
-    @classmethod
-    def find(cls, pk):
-        rs = mongo.db.__getattr__(cls.__table__).find({"name": pk})
-        return cls(**rs[0])
+    def save(self):
+        if self.check_exist():
+            print("Update is needed")
+        else:
+            self.doc.insert(self.fields)
+        

@@ -1,14 +1,17 @@
 import orm as mongodb
 
-class EmbeddedClassScores(mongodb.EmbeddedDocument):
+class EmbeddedClassWeeklyScore(mongodb.EmbeddedDocument):
     date = mongodb.Field()
-    subject = mongodb.Field()
     scores = mongodb.Field()
 
-class EmbeddedInspectorClasses(mongodb.EmbeddedDocument):
+class EmbeddedClassMonthlyScore(mongodb.EmbeddedDocument):
+    date = mongodb.Field()
+    scores = mongodb.Field()
+
+class EmbeddedInspectorClass(mongodb.EmbeddedDocument):
     name = mongodb.Field()
 
-class EmbeddedInspectorSubjects(mongodb.EmbeddedDocument):
+class EmbeddedInspectorSubject(mongodb.EmbeddedDocument):
     name = mongodb.Field()
 
 class Record(mongodb.Document):
@@ -21,12 +24,14 @@ class Record(mongodb.Document):
 
 class Class(mongodb.Document):
     name = mongodb.Field()
-    scores = mongodb.ListField()
+    weekly_scores = mongodb.ListField()
+    monthly_scores = mongodb.ListField()
 
 class Subject(mongodb.Document):
     name = mongodb.Field()
     
 class Inspector(mongodb.Document):
+    __primary__ = "name"
     name = mongodb.Field()
     password = mongodb.Field()
     classes = mongodb.ListField()
