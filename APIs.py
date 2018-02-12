@@ -4,6 +4,7 @@ from MongoOrm import MongoClient
 class RootAPI:
     def __init__(self, DirectAPI:DirectAPIRegister):
         DirectAPI.register('/author', lambda:"HankelBao")
+        DirectAPI.register('/', lambda:"DIDSYS API System")
 
 
 class SubjectsAPI:
@@ -37,6 +38,12 @@ class ClassesAPI:
     def __init__(self, DirectAPI:DirectAPIRegister, mongo:MongoClient):
         self.classes = mongo.db.classes
         DirectAPI.register('/classes', lambda:'Here are APIs about classes')
+
+    def add(self, name:str) -> bool:
+        self.classes.insert({
+            "name":name
+        })
+        return True
 
 class InspectorsAPI:
     def __init__(self, DirectAPI:DirectAPIRegister, mongo:MongoClient):
