@@ -23,3 +23,9 @@ Backend: Flask
     - update inspector subjects 
     - update inspector classes
 
+## API Framework
+What I want from an API Frameowrk:
+
+``` apis.py
+
+```
